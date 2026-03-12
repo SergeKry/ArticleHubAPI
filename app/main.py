@@ -20,5 +20,13 @@ async def lifespan(app: FastAPI):
     await close_mongo_connection()
 
 
-app = FastAPI(title=settings.app_name, lifespan=lifespan)
-app.include_router(api_router)
+def create_app() -> FastAPI:
+    app = FastAPI(
+        title=settings.app_name,
+        lifespan=lifespan,
+    )
+    app.include_router(api_router)
+    return app
+
+
+app = create_app()
