@@ -10,6 +10,8 @@ services:
       - mongo
     volumes:
       - ./app:/app/app
+      - ./tests:/app/tests
+      - ./pytest.ini:/app/pytest.ini
     restart: unless-stopped
 
   mongo:
