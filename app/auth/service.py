@@ -12,6 +12,12 @@ from app.auth.schemas import (
     RefreshRequest,
     TokenPairResponse,
 )
+from app.auth.exceptions import (
+    UserAlreadyExistsError,
+    PasswordMismatchError,
+    InvalidCredentialsError,
+    InvalidRefreshTokenError,
+)
 
 from app.core.auth import (
     TokenType,
@@ -21,22 +27,6 @@ from app.core.auth import (
 )
 
 from app.core.security import hash_password, verify_password
-
-
-class UserAlreadyExistsError(Exception):
-    pass
-
-
-class PasswordMismatchError(Exception):
-    pass
-
-
-class InvalidCredentialsError(Exception):
-    pass
-
-
-class InvalidRefreshTokenError(Exception):
-    pass
 
 
 class AuthService:
