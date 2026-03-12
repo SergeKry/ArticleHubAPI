@@ -41,16 +41,16 @@ async def list_articles(
     )
 
 @router.get(
-    "/{article_id}/",
+    "/{id}/",
     response_model=ArticleResponse,
     status_code=status.HTTP_200_OK,
 )
 async def get_article(
-    article_id: str,
+    id: str,
     service: ArticleService = Depends(get_article_service),
 ):
     try:
-        return await service.get_article(article_id)
+        return await service.get_article(id)
     except InvalidArticleIdError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
