@@ -48,7 +48,7 @@ async def test_register_user_duplicate_email(client):
     second_response = await client.post("/api/auth/register/", json=payload)
 
     assert first_response.status_code == 201
-    assert second_response.status_code == 400
+    assert second_response.status_code == 409
     assert second_response.json()["detail"] == "User with this email already exists"
 
 

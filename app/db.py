@@ -26,5 +26,8 @@ def get_database():
 
 
 def get_users_collection():
-    db = get_database()
-    return db["users"]
+    return get_database()["users"]
+
+
+def get_refresh_tokens_collection():
+    return get_database()["refresh_tokens"]
