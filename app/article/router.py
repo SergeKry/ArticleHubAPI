@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 
 from app.article.dependencies import get_article_service
-from app.article.schemas import ArticleCreateRequest, ArticleResponse
+from app.article.schemas import ArticleCreateRequest, ArticleResponse, ArticleShortResponse
 from app.article.service import ArticleService
 from app.core.auth import get_current_access_token_payload
 
@@ -21,4 +21,20 @@ async def create_article(
     return await service.create_article(
         payload=payload,
         author_id=token_payload["sub"],
+    )
+
+
+@router.get(
+    "/",
+    response_model=list[ArticleShortResponse],
+    status_code=status.HTTP_200_OK,
+)
+async def list_articles(
+    search: str | None = Query(default=None, min_length=1),
+    tag: str | None = Query(default=None, min_length=1),
+    service: ArticleService = Depends(get_article_service),
+):
+    return await service.list_articles(
+        search=search,
+        tag=tag,
     )

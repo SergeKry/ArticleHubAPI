@@ -39,3 +39,10 @@ class ArticleResponse(BaseModel):
     tags: list[str]
     author: str
     created_at: datetime
+
+
+class ArticleShortResponse(BaseModel):
+    id: str
+    title: str
+    tags: list[str]
+    author: str

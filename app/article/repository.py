@@ -34,6 +34,35 @@ class ArticleRepository:
 
         return created_article
 
+    async def list_articles(
+        self,
+        *,
+        search: str | None = None,
+        tag: str | None = None,
+    ) -> list[dict[str, Any]]:
+        query: dict[str, Any] = {}
+
+        if search:
+            query["$or"] = [
+                {"title": {"$regex": search, "$options": "i"}},
+                {"content": {"$regex": search, "$options": "i"}},
+            ]
+
+        if tag:
+            query["tags"] = tag.strip().lower()
+
+        cursor = self.collection.find(
+            query,
+            {
+                "_id": 1,
+                "title": 1,
+                "tags": 1,
+                "author": 1,
+            },
+        ).sort("created_at", -1)
+
+        return await cursor.to_list(length=None)
+
     async def create_indexes(self) -> None:
         await self.collection.create_index("author")
         await self.collection.create_index("created_at")
