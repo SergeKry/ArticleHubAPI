@@ -95,8 +95,6 @@ async def profile(
     service: AuthService = Depends(get_auth_service),
 ):
     try:
-        print(f"Token payload sub: {token_payload['sub']}")
-        print(f"Token payload type: {type(token_payload['sub'])}")
         return await service.get_profile(token_payload["sub"])
     except InvalidCredentialsError as exc:
         raise HTTPException(status_code=401, detail=str(exc)) from exc
