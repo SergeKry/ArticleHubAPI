@@ -52,3 +52,16 @@ async def registered_user(client):
     response = await client.post("/api/auth/register/", json=payload)
     assert response.status_code == 201
     return payload
+
+
+@pytest_asyncio.fixture
+async def auth_tokens(client, registered_user):
+    response = await client.post(
+        "/api/auth/login/",
+        json={
+            "email": registered_user["email"],
+            "password": registered_user["password"],
+        },
+    )
+    assert response.status_code == 200
+    return response.json()
