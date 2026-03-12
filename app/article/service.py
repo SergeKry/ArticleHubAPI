@@ -1,5 +1,8 @@
+from bson import ObjectId
+
 from app.article.repository import ArticleRepository
 from app.article.schemas import ArticleCreateRequest, ArticleResponse, ArticleShortResponse
+from app.article.exceptions import ArticleNotFoundError, InvalidArticleIdError
 
 
 class ArticleService:
@@ -47,3 +50,22 @@ class ArticleService:
             )
             for article in articles
         ]
+
+    async def get_article(self, article_id: str) -> ArticleResponse:
+        try:
+            article_object_id = ObjectId(article_id)
+        except Exception:
+            raise InvalidArticleIdError("Invalid article ID format")
+        
+        article = await self.repository.get_article_by_id(article_object_id)
+        if article is None:
+            raise ArticleNotFoundError("Article not found")
+
+        return ArticleResponse(
+            id=str(article["_id"]),
+            title=article["title"],
+            content=article["content"],
+            tags=article["tags"],
+            author=article["author"],
+            created_at=article["created_at"],
+        )

@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, status, HTTPException
 
 from app.article.dependencies import get_article_service
+from app.article.exceptions import ArticleNotFoundError, InvalidArticleIdError
 from app.article.schemas import ArticleCreateRequest, ArticleResponse, ArticleShortResponse
 from app.article.service import ArticleService
 from app.core.auth import get_current_access_token_payload
@@ -38,3 +39,25 @@ async def list_articles(
         search=search,
         tag=tag,
     )
+
+@router.get(
+    "/{article_id}/",
+    response_model=ArticleResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def get_article(
+    article_id: str,
+    service: ArticleService = Depends(get_article_service),
+):
+    try:
+        return await service.get_article(article_id)
+    except InvalidArticleIdError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+    except ArticleNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc

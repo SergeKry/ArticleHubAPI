@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from typing import Any
+from bson import ObjectId
 
 from app.db import get_database
 
@@ -62,6 +63,9 @@ class ArticleRepository:
         ).sort("created_at", -1)
 
         return await cursor.to_list(length=None)
+
+    async def get_article_by_id(self, article_id: ObjectId) -> dict[str, Any] | None:
+        return await self.collection.find_one({"_id": article_id})
 
     async def create_indexes(self) -> None:
         await self.collection.create_index("author")
