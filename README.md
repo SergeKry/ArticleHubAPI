@@ -35,7 +35,7 @@ docker compose up -d
 docker compose exec api pytest -v
 
 # Run specific test file
-docker compose exec api pytest tests/auth/test_auth_register.py -v
+docker compose exec api pytest tests/auth/test_register.py -v
 
 # Run specific test
-docker compose exec api pytest tests/auth/test_auth_register.py::test_register_user_success -v
+docker compose exec api pytest tests/auth/test_register.py::test_register_user_success -v

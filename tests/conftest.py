@@ -39,3 +39,16 @@ async def client(app):
         base_url="http://testserver",
     ) as ac:
         yield ac
+
+
+@pytest_asyncio.fixture
+async def registered_user(client):
+    payload = {
+        "email": "user@example.com",
+        "password": "string123",
+        "password_confirm": "string123",
+        "name": "John Doe",
+    }
+    response = await client.post("/api/auth/register/", json=payload)
+    assert response.status_code == 201
+    return payload
