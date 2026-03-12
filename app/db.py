@@ -23,3 +23,8 @@ def get_database():
     if mongodb.client is None:
         raise RuntimeError("MongoDB client is not initialized")
     return mongodb.client[settings.mongo_db]
+
+
+def get_users_collection():
+    db = get_database()
+    return db["users"]
