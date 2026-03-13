@@ -2,12 +2,11 @@ from datetime import datetime, timezone
 from typing import Any
 from bson import ObjectId
 
-from app.db import get_database
-
+from app.db import get_articles_collection
 
 class ArticleRepository:
     def __init__(self) -> None:
-        self.collection = get_database()["articles"]
+        self.collection = get_articles_collection()
 
     async def create_article(
         self,
