@@ -15,5 +15,15 @@ celery_app.conf.update(
     result_serializer="json",
     timezone="UTC",
     enable_utc=True,
-    imports=("app.tasks.email_tasks",),
+    imports=(
+        "app.tasks.email_tasks",
+        "app.tasks.article_tasks",
+        "app.tasks.analytics_tasks",
+    ),
+    beat_schedule={
+        "collect-total-articles-every-12-hours": {
+            "task": "app.tasks.analytics_tasks.collect_total_articles_snapshot",
+            "schedule": 60 * 60 * 12,
+        },
+    },
 )

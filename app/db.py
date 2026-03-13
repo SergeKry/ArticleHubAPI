@@ -39,3 +39,7 @@ def get_articles_collection():
 
 def get_email_notifications_collection():
     return get_database()["email_notifications"]
+
+
+def get_analytics_snapshots_collection():
+    return get_database()["analytics_snapshots"]

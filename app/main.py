@@ -8,6 +8,7 @@ from app.article.repository import ArticleRepository
 from app.config import settings
 from app.db import connect_to_mongo, close_mongo_connection
 from app.notifications.repository import EmailNotificationRepository
+from app.analytics.repository import AnalyticsRepository
 
 
 @asynccontextmanager
@@ -22,6 +23,9 @@ async def lifespan(app: FastAPI):
 
     email_notification_repository = EmailNotificationRepository()
     await email_notification_repository.create_indexes()
+
+    analytics_repository = AnalyticsRepository()
+    await analytics_repository.create_indexes()
 
     yield
 

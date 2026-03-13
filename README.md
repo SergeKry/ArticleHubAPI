@@ -6,6 +6,8 @@ A FastAPI application with MongoDB for article management.
 
 - **FastAPI** - Modern, fast web framework for building APIs
 - **MongoDB** - NoSQL database for data storage
+- **Redis** - In-memory data store used as message broker
+- **Celery** - Distributed task queue for background processing
 - **Docker** - Containerization for easy deployment
 
 ## Quick Start
