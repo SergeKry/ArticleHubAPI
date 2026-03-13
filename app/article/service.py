@@ -1,4 +1,5 @@
 from bson import ObjectId
+from typing import Any
 
 from app.article.repository import ArticleRepository
 from app.article.schemas import ArticleCreateRequest, ArticleResponse, ArticleShortResponse, ArticleUpdateRequest
@@ -8,6 +9,19 @@ from app.article.exceptions import ArticleNotFoundError, InvalidArticleIdError, 
 class ArticleService:
     def __init__(self, repository: ArticleRepository) -> None:
         self.repository = repository
+
+    async def _get_article_and_object_id_or_raise(self, article_id: str) -> tuple[dict[str, Any], ObjectId]:
+        """Helper method to convert string ID to ObjectId and get article or raise appropriate error."""
+        try:
+            article_object_id = ObjectId(article_id)
+        except Exception:
+            raise InvalidArticleIdError("Invalid article ID format")
+        
+        article = await self.repository.get_article_by_id(article_object_id)
+        if article is None:
+            raise ArticleNotFoundError("Article not found")
+        
+        return article, article_object_id
 
     async def create_article(
         self,
@@ -52,14 +66,7 @@ class ArticleService:
         ]
 
     async def get_article(self, article_id: str) -> ArticleResponse:
-        try:
-            article_object_id = ObjectId(article_id)
-        except Exception:
-            raise InvalidArticleIdError("Invalid article ID format")
-        
-        article = await self.repository.get_article_by_id(article_object_id)
-        if article is None:
-            raise ArticleNotFoundError("Article not found")
+        article, _ = await self._get_article_and_object_id_or_raise(article_id)
 
         return ArticleResponse(
             id=str(article["_id"]),
@@ -77,14 +84,7 @@ class ArticleService:
         payload: ArticleUpdateRequest,
         current_user_id: str,
     ) -> ArticleResponse:
-        try:
-            article_object_id = ObjectId(article_id)
-        except Exception:
-            raise InvalidArticleIdError("Invalid article ID format")
-        
-        article = await self.repository.get_article_by_id(article_object_id)
-        if article is None:
-            raise ArticleNotFoundError("Article not found")
+        article, article_object_id = await self._get_article_and_object_id_or_raise(article_id)
 
         if article["author"] != current_user_id:
             raise ArticlePermissionDeniedError("You are not allowed to edit this article")
@@ -112,14 +112,7 @@ class ArticleService:
         article_id: str,
         current_user_id: str,
     ) -> None:
-        try:
-            article_object_id = ObjectId(article_id)
-        except Exception:
-            raise InvalidArticleIdError("Invalid article ID format")
-        
-        article = await self.repository.get_article_by_id(article_object_id)
-        if article is None:
-            raise ArticleNotFoundError("Article not found")
+        article, article_object_id = await self._get_article_and_object_id_or_raise(article_id)
 
         if article["author"] != current_user_id:
             raise ArticlePermissionDeniedError("You are not allowed to delete this article")
