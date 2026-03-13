@@ -4,43 +4,6 @@ import pytest
 CREATE_ARTICLE_URL = "/api/articles/"
 
 
-async def register_user(
-    client,
-    *,
-    email: str,
-    password: str,
-    name: str,
-):
-    response = await client.post(
-        "/api/auth/register/",
-        json={
-            "email": email,
-            "password": password,
-            "password_confirm": password,
-            "name": name,
-        },
-    )
-    assert response.status_code == 201
-    return response.json()
-
-
-async def login_user(
-    client,
-    *,
-    email: str,
-    password: str,
-):
-    response = await client.post(
-        "/api/auth/login/",
-        json={
-            "email": email,
-            "password": password,
-        },
-    )
-    assert response.status_code == 200
-    return response.json()
-
-
 async def create_article(
     client,
     access_token: str,
@@ -162,7 +125,8 @@ async def test_update_article_with_refresh_token_fails(client, auth_tokens):
 
 
 @pytest.mark.asyncio
-async def test_update_article_forbidden_for_non_author(client, auth_tokens):
+async def test_update_article_forbidden_for_non_author(client, auth_tokens, registered_user):
+    # Create article with first user
     created_article = await create_article(
         client,
         auth_tokens["access_token"],
@@ -171,17 +135,24 @@ async def test_update_article_forbidden_for_non_author(client, auth_tokens):
         tags=["python"],
     )
 
-    await register_user(
-        client,
-        email="second@example.com",
-        password="string123",
-        name="Second User",
+    # Create second user and get their tokens
+    second_user_payload = {
+        "email": "second@example.com",
+        "password": "string123",
+        "password_confirm": "string123",
+        "name": "Second User",
+    }
+    await client.post("/api/auth/register/", json=second_user_payload)
+    
+    second_user_tokens_response = await client.post(
+        "/api/auth/login/",
+        json={
+            "email": second_user_payload["email"],
+            "password": second_user_payload["password"],
+        },
     )
-    second_user_tokens = await login_user(
-        client,
-        email="second@example.com",
-        password="string123",
-    )
+    assert second_user_tokens_response.status_code == 200
+    second_user_tokens = second_user_tokens_response.json()
 
     response = await client.patch(
         f"/api/articles/{created_article['id']}/",
