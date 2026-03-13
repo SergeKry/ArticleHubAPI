@@ -5,7 +5,7 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - .env
+      - ${APP_ENV_FILE:-.env}
     depends_on:
       - mongo
       - redis
@@ -39,7 +39,7 @@ services:
     build: .
     container_name: celery_worker
     env_file:
-      - .env
+      - ${APP_ENV_FILE:-.env}
     depends_on:
       - mongo
       - redis
@@ -52,7 +52,7 @@ services:
     build: .
     container_name: celery_beat
     env_file:
-      - .env
+      - ${APP_ENV_FILE:-.env}
     depends_on:
       - mongo
       - redis
