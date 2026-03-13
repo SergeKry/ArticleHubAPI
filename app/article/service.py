@@ -5,6 +5,8 @@ from app.article.repository import ArticleRepository
 from app.article.schemas import ArticleCreateRequest, ArticleResponse, ArticleShortResponse, ArticleUpdateRequest
 from app.article.exceptions import ArticleNotFoundError, InvalidArticleIdError, ArticlePermissionDeniedError
 
+from app.tasks.article_tasks import analyze_article
+
 
 class ArticleService:
     def __init__(self, repository: ArticleRepository) -> None:
@@ -120,3 +122,16 @@ class ArticleService:
         deleted = await self.repository.delete_article(article_object_id)
         if not deleted:
             raise ArticleNotFoundError("Article not found")
+
+    async def analyze_article(self, *, article_id: str) -> None:
+        article, article_object_id = await self._get_article_and_object_id_or_raise(article_id)
+        
+        # Convert ObjectId to string for JSON serialization
+        article_data = {
+            "_id": str(article_object_id),
+            "content": article.get("content", ""),
+            "tags": article.get("tags", []),
+        }
+        
+        analyze_article.delay(article_data)
+

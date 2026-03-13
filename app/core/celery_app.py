@@ -15,5 +15,5 @@ celery_app.conf.update(
     result_serializer="json",
     timezone="UTC",
     enable_utc=True,
-    imports=("app.tasks.email_tasks",),
+    imports=("app.tasks.email_tasks", "app.tasks.article_tasks"),
 )

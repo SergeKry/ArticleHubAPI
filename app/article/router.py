@@ -127,3 +127,25 @@ async def delete_article(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(exc),
         ) from exc
+
+@router.post(
+    "/{id}/analyze/",
+    status_code=status.HTTP_200_OK,
+)
+async def analyze_article(
+    id: str,
+    service: ArticleService = Depends(get_article_service),
+):
+    try:
+        await service.analyze_article(article_id=id)
+        return Response(status_code=status.HTTP_200_OK)
+    except ArticleNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+    except InvalidArticleIdError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
