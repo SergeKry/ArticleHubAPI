@@ -27,7 +27,7 @@ from app.db import get_database
 def drop_test_database_after_session():
     yield
 
-    client = MongoClient(settings.mongo_url)
+    client = MongoClient(settings.resolved_mongo_url)
     try:
         client.drop_database(test_db_name)
     finally:
