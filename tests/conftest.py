@@ -1,21 +1,37 @@
 import os
 import uuid
 
+import pytest
 import pytest_asyncio
 from asgi_lifespan import LifespanManager
 from httpx import ASGITransport, AsyncClient
+from pymongo import MongoClient
 
 # Set test env BEFORE importing app modules
 os.environ["APP_NAME"] = "FastAPI Mongo App Test"
 os.environ["MONGO_ROOT_USERNAME"] = "admin"
 os.environ["MONGO_ROOT_PASSWORD"] = "secret123"
+
 # Use unique database name for each test session
-os.environ["MONGO_DB"] = f"myapp_test_{uuid.uuid4().hex[:8]}"
+test_db_name = f"myapp_test_{uuid.uuid4().hex[:8]}"
+os.environ["MONGO_DB"] = test_db_name
 os.environ["MONGO_HOST"] = "mongo"
 os.environ["MONGO_PORT"] = "27017"
 
+from app.config import settings
 from app.main import create_app
 from app.db import get_database
+
+
+@pytest.fixture(scope="session", autouse=True)
+def drop_test_database_after_session():
+    yield
+
+    client = MongoClient(settings.mongo_url)
+    try:
+        client.drop_database(test_db_name)
+    finally:
+        client.close()
 
 
 @pytest_asyncio.fixture
@@ -26,17 +42,20 @@ async def app():
 
 
 @pytest_asyncio.fixture(autouse=True)
-async def clean_database(app):  # important: depend on app
+async def clean_database(app):
     db = get_database()
-    # Clear all collections before each test
+
     await db.users.delete_many({})
     await db.articles.delete_many({})
     await db.refresh_tokens.delete_many({})
+    await db.email_notifications.delete_many({})
+
     yield
-    # Clear all collections after each test
+
     await db.users.delete_many({})
     await db.articles.delete_many({})
     await db.refresh_tokens.delete_many({})
+    await db.email_notifications.delete_many({})
 
 
 @pytest_asyncio.fixture
