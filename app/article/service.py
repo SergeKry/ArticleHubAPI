@@ -1,8 +1,8 @@
 from bson import ObjectId
 
 from app.article.repository import ArticleRepository
-from app.article.schemas import ArticleCreateRequest, ArticleResponse, ArticleShortResponse
-from app.article.exceptions import ArticleNotFoundError, InvalidArticleIdError
+from app.article.schemas import ArticleCreateRequest, ArticleResponse, ArticleShortResponse, ArticleUpdateRequest
+from app.article.exceptions import ArticleNotFoundError, InvalidArticleIdError, ArticlePermissionDeniedError
 
 
 class ArticleService:
@@ -69,3 +69,61 @@ class ArticleService:
             author=article["author"],
             created_at=article["created_at"],
         )
+
+    async def update_article(
+        self,
+        *,
+        article_id: str,
+        payload: ArticleUpdateRequest,
+        current_user_id: str,
+    ) -> ArticleResponse:
+        try:
+            article_object_id = ObjectId(article_id)
+        except Exception:
+            raise InvalidArticleIdError("Invalid article ID format")
+        
+        article = await self.repository.get_article_by_id(article_object_id)
+        if article is None:
+            raise ArticleNotFoundError("Article not found")
+
+        if article["author"] != current_user_id:
+            raise ArticlePermissionDeniedError("You are not allowed to edit this article")
+
+        update_data = payload.model_dump(exclude_unset=True)
+        updated_article = await self.repository.update_article(
+            article_id=article_object_id,
+            update_data=update_data,
+        )
+        if updated_article is None:
+            raise ArticleNotFoundError("Article not found")
+
+        return ArticleResponse(
+            id=str(updated_article["_id"]),
+            title=updated_article["title"],
+            content=updated_article["content"],
+            tags=updated_article["tags"],
+            author=updated_article["author"],
+            created_at=updated_article["created_at"],
+        )
+
+    async def delete_article(
+        self,
+        *,
+        article_id: str,
+        current_user_id: str,
+    ) -> None:
+        try:
+            article_object_id = ObjectId(article_id)
+        except Exception:
+            raise InvalidArticleIdError("Invalid article ID format")
+        
+        article = await self.repository.get_article_by_id(article_object_id)
+        if article is None:
+            raise ArticleNotFoundError("Article not found")
+
+        if article["author"] != current_user_id:
+            raise ArticlePermissionDeniedError("You are not allowed to delete this article")
+
+        deleted = await self.repository.delete_article(article_object_id)
+        if not deleted:
+            raise ArticleNotFoundError("Article not found")

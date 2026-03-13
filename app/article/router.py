@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, Query, status, HTTPException
+from fastapi import APIRouter, Depends, Query, status, HTTPException, Response
 
 from app.article.dependencies import get_article_service
-from app.article.exceptions import ArticleNotFoundError, InvalidArticleIdError
-from app.article.schemas import ArticleCreateRequest, ArticleResponse, ArticleShortResponse
+from app.article.exceptions import ArticleNotFoundError, InvalidArticleIdError, ArticlePermissionDeniedError
+from app.article.schemas import ArticleCreateRequest, ArticleResponse, ArticleShortResponse, ArticleUpdateRequest
 from app.article.service import ArticleService
 from app.core.auth import get_current_access_token_payload
 
@@ -59,5 +59,71 @@ async def get_article(
     except ArticleNotFoundError as exc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+
+
+@router.patch(
+    "/{id}/",
+    response_model=ArticleResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def update_article(
+    id: str,
+    payload: ArticleUpdateRequest,
+    token_payload: dict = Depends(get_current_access_token_payload),
+    service: ArticleService = Depends(get_article_service),
+):
+    try:
+        return await service.update_article(
+            article_id=id,
+            payload=payload,
+            current_user_id=token_payload["sub"],
+        )
+    except ArticleNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+    except ArticlePermissionDeniedError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=str(exc),
+        ) from exc
+    except InvalidArticleIdError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+
+
+@router.delete(
+    "/{id}/",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def delete_article(
+    id: str,
+    token_payload: dict = Depends(get_current_access_token_payload),
+    service: ArticleService = Depends(get_article_service),
+):
+    try:
+        await service.delete_article(
+            article_id=id,
+            current_user_id=token_payload["sub"],
+        )
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+    except ArticleNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+    except ArticlePermissionDeniedError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=str(exc),
+        ) from exc
+    except InvalidArticleIdError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(exc),
         ) from exc

@@ -67,6 +67,22 @@ class ArticleRepository:
     async def get_article_by_id(self, article_id: ObjectId) -> dict[str, Any] | None:
         return await self.collection.find_one({"_id": article_id})
 
+    async def update_article(
+        self,
+        *,
+        article_id: ObjectId,
+        update_data: dict[str, Any],
+    ) -> dict[str, Any] | None:
+        await self.collection.update_one(
+            {"_id": article_id},
+            {"$set": update_data},
+        )
+        return await self.collection.find_one({"_id": article_id})
+
+    async def delete_article(self, article_id: ObjectId) -> bool:
+        result = await self.collection.delete_one({"_id": article_id})
+        return result.deleted_count > 0
+
     async def create_indexes(self) -> None:
         await self.collection.create_index("author")
         await self.collection.create_index("created_at")

@@ -4,3 +4,7 @@ class ArticleNotFoundError(Exception):
 
 class InvalidArticleIdError(Exception):
     pass
+
+
+class ArticlePermissionDeniedError(Exception):
+    pass
