@@ -1,4 +1,5 @@
 import os
+import uuid
 
 import pytest_asyncio
 from asgi_lifespan import LifespanManager
@@ -8,7 +9,8 @@ from httpx import ASGITransport, AsyncClient
 os.environ["APP_NAME"] = "FastAPI Mongo App Test"
 os.environ["MONGO_ROOT_USERNAME"] = "admin"
 os.environ["MONGO_ROOT_PASSWORD"] = "secret123"
-os.environ["MONGO_DB"] = "myapp_test"
+# Use unique database name for each test session
+os.environ["MONGO_DB"] = f"myapp_test_{uuid.uuid4().hex[:8]}"
 os.environ["MONGO_HOST"] = "mongo"
 os.environ["MONGO_PORT"] = "27017"
 
@@ -26,9 +28,15 @@ async def app():
 @pytest_asyncio.fixture(autouse=True)
 async def clean_database(app):  # important: depend on app
     db = get_database()
+    # Clear all collections before each test
     await db.users.delete_many({})
+    await db.articles.delete_many({})
+    await db.refresh_tokens.delete_many({})
     yield
+    # Clear all collections after each test
     await db.users.delete_many({})
+    await db.articles.delete_many({})
+    await db.refresh_tokens.delete_many({})
 
 
 @pytest_asyncio.fixture

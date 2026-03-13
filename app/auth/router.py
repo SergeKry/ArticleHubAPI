@@ -1,6 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 
 from app.auth.dependencies import get_auth_service
+from app.auth.exceptions import (
+    InvalidCredentialsError,
+    InvalidRefreshTokenError,
+    PasswordMismatchError,
+    UserAlreadyExistsError,
+)
 from app.auth.schemas import (
     LoginRequest,
     LogoutRequest,
@@ -10,13 +16,7 @@ from app.auth.schemas import (
     RegisterResponse,
     TokenPairResponse,
 )
-from app.auth.service import (
-    AuthService,
-    InvalidCredentialsError,
-    InvalidRefreshTokenError,
-    PasswordMismatchError,
-    UserAlreadyExistsError,
-)
+from app.auth.service import AuthService
 
 from app.core.auth import get_current_access_token_payload
 
