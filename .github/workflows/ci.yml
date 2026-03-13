@@ -16,12 +16,12 @@ jobs:
 
       - name: Build containers
         run: |
-          docker compose --env-file .env.test up -d --build mongo redis api
+          APP_ENV_FILE=.env.test docker compose --env-file .env.test up -d --build mongo redis api
 
       - name: Run tests
         run: |
-          docker compose exec -T api pytest
+          APP_ENV_FILE=.env.test docker compose --env-file .env.test exec -T api pytest
 
       - name: Stop containers
         run: |
-          docker compose down -v
+          APP_ENV_FILE=.env.test docker compose --env-file .env.test exec -T api pytest
