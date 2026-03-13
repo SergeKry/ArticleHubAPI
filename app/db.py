@@ -31,3 +31,11 @@ def get_users_collection():
 
 def get_refresh_tokens_collection():
     return get_database()["refresh_tokens"]
+
+
+def get_articles_collection():
+    return get_database()["articles"]
+
+
+def get_email_notifications_collection():
+    return get_database()["email_notifications"]

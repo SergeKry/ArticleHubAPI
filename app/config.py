@@ -15,6 +15,9 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 15
     refresh_token_expire_days: int = 30
 
+    redis_host: str = "redis"
+    redis_port: int = 6379
+
     model_config = SettingsConfigDict(
         env_file=".env",
         extra="ignore",
@@ -26,6 +29,10 @@ class Settings(BaseSettings):
             f"mongodb://{self.mongo_root_username}:"
             f"{self.mongo_root_password}@{self.mongo_host}:{self.mongo_port}/"
         )
+
+    @property
+    def redis_url(self) -> str:
+        return f"redis://{self.redis_host}:{self.redis_port}/0"
 
 
 settings = Settings()

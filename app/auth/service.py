@@ -27,6 +27,7 @@ from app.core.auth import (
 )
 
 from app.core.security import hash_password, verify_password
+from app.tasks.email_tasks import log_welcome_email
 
 
 class AuthService:
@@ -47,6 +48,12 @@ class AuthService:
             email=payload.email,
             hashed_password=hashed_password,
             name=payload.name,
+        )
+
+        log_welcome_email.delay(
+            user_id=str(created_user["_id"]),
+            email=created_user["email"],
+            name=created_user["name"],
         )
 
         return RegisterResponse(
