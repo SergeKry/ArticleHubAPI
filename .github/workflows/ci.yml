@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build containers
+        run: |
+          docker compose --env-file .env.test up -d --build mongo redis api
+
+      - name: Run tests
+        run: |
+          docker compose exec -T api pytest
+
+      - name: Stop containers
+        run: |
+          docker compose down -v
