@@ -8,7 +8,7 @@ from app.config import settings
 
 class AnalyticsWorkerRepository:
     def __init__(self) -> None:
-        self.client = MongoClient(settings.mongo_url)
+        self.client = MongoClient(settings.resolved_mongo_url)
         self.db = self.client[settings.mongo_db]
         self.articles = self.db["articles"]
         self.snapshots = self.db["analytics_snapshots"]

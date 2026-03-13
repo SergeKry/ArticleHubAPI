@@ -8,7 +8,7 @@ from app.config import settings
 
 class EmailNotificationWorkerRepository:
     def __init__(self) -> None:
-        self.client = MongoClient(settings.mongo_url)
+        self.client = MongoClient(settings.resolved_mongo_url)
         self.collection = self.client[settings.mongo_db]["email_notifications"]
 
     def create_email_log(

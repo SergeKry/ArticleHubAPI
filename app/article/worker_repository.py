@@ -8,7 +8,7 @@ from app.config import settings
 
 class ArticleWorkerRepository:
     def __init__(self) -> None:
-        self.client = MongoClient(settings.mongo_url)
+        self.client = MongoClient(settings.resolved_mongo_url)
         self.collection = self.client[settings.mongo_db]["articles"]
 
     def attach_analysis(

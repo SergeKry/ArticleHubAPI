@@ -10,7 +10,7 @@ mongodb = MongoDB()
 
 
 async def connect_to_mongo() -> None:
-    mongodb.client = AsyncMongoClient(settings.mongo_url)
+    mongodb.client = AsyncMongoClient(settings.resolved_mongo_url)
 
 
 async def close_mongo_connection() -> None:
